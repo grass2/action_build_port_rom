@@ -60,7 +60,7 @@ jobs:
           pip3 install requests
           pip3 install beautifulsoup4
           pip3 install --ignore-installed pyyaml
-      - name: - Make roms‌
+      - name: -Make roms‌
         run: |
           sudo bash "$GITHUB_WORKSPACE"/make.sh ${URL} ${OS_version} ${GITHUB_WORKSPACE} $GITHUB_ENV ${Bottom_URL} ${IMAGE_TYPE} ${EXT4_RW}
       - name:- Processing Package
