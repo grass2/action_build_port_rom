@@ -64,40 +64,14 @@ jobs:
         run: |
           sudo bash "$GITHUB_WORKSPACE"/make.sh ${URL} ${OS_version} ${GITHUB_WORKSPACE} $GITHUB_ENV ${Bottom_URL} ${IMAGE_TYPE} ${EXT4_RW}
           
-      - name: Upload ROM
-        run: |
-          # Fetch the list of servers from the Gofile API
-          servers=$(curl -s https://api.gofile.io/servers | jq -r '.data.servers[].name')
-          if [[ $? -ne 0 || -z "$servers" ]]; then
-              exit 1
-          fi
-
-          # Check if there are any servers
-          if [[ -z "$servers" ]]; then
-              exit 1
-          fi
-
-          # Choose a random server from the list
-          server_array=($servers)
-          random_index=$(( RANDOM % ${#server_array[@]} ))
-          best_server=${server_array[$random_index]}
-
-          # Upload the file to the selected server
-          upload_response=$(curl -L -N -F "file=@${{ env.rom_path }}" "https://${best_server}.gofile.io/contents/uploadFile")
-          if [[ $? -ne 0 ]]; then
-              exit 1
-          fi
-
-          link_rom=$(echo "$upload_response" | jq -r .data.downloadPage)
-          if [[ -z "$link_rom" || "$link_rom" == "null" ]]; then
-              exit 1
-          fi
-          echo "Link Download: $link_rom"
-
-          # Create or update the log file with details of the upload
-          log_file="${GITHUB_WORKSPACE}/log.txt"
-          touch "$log_file"
-          chmod 777 "$log_file"
+      - name: -Upload gofile
+      run: |
+        User="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        url2=$(curl -s https://api.gofile.io/servers | jq -r '.data.servers[0].name')
+        [ -z "$url2" ] && url2="store$(( $RANDOM % 8 + 1 ))"
+        LinkFile="$(curl --dns-servers '1.1.1.1' -L -N -H "$User" -F "file=@out/moded_framework_services_${{ env.device_name }}_${{ env.version }}.zip" "https://${url2}.gofile.io/uploadFile" | jq -r .data.downloadPage)"
+        echo -e "Link: $LinkFile" >> release_notes.txt
+    
           {
               echo "- Port ROM: ${{ github.event.inputs.URL }}"
               echo "- ReHyper ROM: $link_rom"
@@ -117,6 +91,7 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE"/GithubRelease
           cd "$GITHUB_WORKSPACE"/GithubRelease
           sudo split -b 1536M -d "$GITHUB_WORKSPACE"/zip/"${{ env.NEW_PACKAGE_NAME }}" "${{ env.NEW_PACKAGE_NAME }}"
+          
       - name: -Upload to Github Release
         uses: ncipollo/release-action@main
         with:
