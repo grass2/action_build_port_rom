@@ -63,6 +63,7 @@ jobs:
       - name: -Make roms‌
         run: |
           sudo bash "$GITHUB_WORKSPACE"/make.sh ${URL} ${OS_version} ${GITHUB_WORKSPACE} $GITHUB_ENV ${Bottom_URL} ${IMAGE_TYPE} ${EXT4_RW}
+          
       - name: Upload ROM
         run: |
           # Fetch the list of servers from the Gofile API
@@ -98,11 +99,11 @@ jobs:
           touch "$log_file"
           chmod 777 "$log_file"
           {
-              echo "- Official ROM: ${{ github.event.inputs.URL }}"
+              echo "- Port ROM: ${{ github.event.inputs.URL }}"
               echo "- ReHyper ROM: $link_rom"
-              echo "- BuildType: ${{ github.event.inputs.BuildType }}"
+              echo "- Vendor Rom: ${{ github.event.inputs.Bottom_URL }}"
               echo "- MD5: ${{ env.rom_md5 }}"
-              echo "- Core patch: ${{ github.event.inputs.CorePatch }}"
+             
               echo "- Build time: $(date +'%Y-%m-%d %H:%M:%S')"
               echo "- Note: ${{ github.event.inputs.Note }}"
           } >> "$log_file"
@@ -111,7 +112,7 @@ jobs:
           date=$(date +'%Y-%m-%d_%H-%M-%S')
           echo "V_TAG=${{ env.device_name }}-${date}" >> $GITHUB_ENV
 
-      - name: -Processing Package
+      - name: -Processing Split Package
         run: |
           mkdir -p "$GITHUB_WORKSPACE"/GithubRelease
           cd "$GITHUB_WORKSPACE"/GithubRelease
