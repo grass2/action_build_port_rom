@@ -64,14 +64,13 @@ jobs:
         run: |
           sudo bash "$GITHUB_WORKSPACE"/make.sh ${URL} ${OS_version} ${GITHUB_WORKSPACE} $GITHUB_ENV ${Bottom_URL} ${IMAGE_TYPE} ${EXT4_RW}
           
-      - name: -Upload gofile
-      run: |
+      - name: Upload File
+        run: |
         User="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         url2=$(curl -s https://api.gofile.io/servers | jq -r '.data.servers[0].name')
         [ -z "$url2" ] && url2="store$(( $RANDOM % 8 + 1 ))"
-        LinkFile="$(curl --dns-servers '1.1.1.1' -L -N -H "$User" -F "file=@out/moded_framework_services_${{ env.device_name }}_${{ env.version }}.zip" "https://${url2}.gofile.io/uploadFile" | jq -r .data.downloadPage)"
+        LinkFile="$(curl --dns-servers '1.1.1.1' -L -N -H "$User" -F "file=@out/nomoded_framework_services_${{ env.device_name }}_${{ env.version }}.zip" "https://${url2}.gofile.io/uploadFile" | jq -r .data.downloadPage)"
         echo -e "Link: $LinkFile" >> release_notes.txt
-    
           {
               echo "- Port ROM: ${{ github.event.inputs.URL }}"
               echo "- ReHyper ROM: $link_rom"
