@@ -63,6 +63,54 @@ jobs:
       - name: -Make roms‌
         run: |
           sudo bash "$GITHUB_WORKSPACE"/make.sh ${URL} ${OS_version} ${GITHUB_WORKSPACE} $GITHUB_ENV ${Bottom_URL} ${IMAGE_TYPE} ${EXT4_RW}
+      - name: Upload ROM
+        run: |
+          # Fetch the list of servers from the Gofile API
+          servers=$(curl -s https://api.gofile.io/servers | jq -r '.data.servers[].name')
+          if [[ $? -ne 0 || -z "$servers" ]]; then
+              exit 1
+          fi
+
+          # Check if there are any servers
+          if [[ -z "$servers" ]]; then
+              exit 1
+          fi
+
+          # Choose a random server from the list
+          server_array=($servers)
+          random_index=$(( RANDOM % ${#server_array[@]} ))
+          best_server=${server_array[$random_index]}
+
+          # Upload the file to the selected server
+          upload_response=$(curl -L -N -F "file=@${{ env.rom_path }}" "https://${best_server}.gofile.io/contents/uploadFile")
+          if [[ $? -ne 0 ]]; then
+              exit 1
+          fi
+
+          link_rom=$(echo "$upload_response" | jq -r .data.downloadPage)
+          if [[ -z "$link_rom" || "$link_rom" == "null" ]]; then
+              exit 1
+          fi
+          echo "Link Download: $link_rom"
+
+          # Create or update the log file with details of the upload
+          log_file="${GITHUB_WORKSPACE}/log.txt"
+          touch "$log_file"
+          chmod 777 "$log_file"
+          {
+              echo "- Official ROM: ${{ github.event.inputs.URL }}"
+              echo "- ReHyper ROM: $link_rom"
+              echo "- BuildType: ${{ github.event.inputs.BuildType }}"
+              echo "- MD5: ${{ env.rom_md5 }}"
+              echo "- Core patch: ${{ github.event.inputs.CorePatch }}"
+              echo "- Build time: $(date +'%Y-%m-%d %H:%M:%S')"
+              echo "- Note: ${{ github.event.inputs.Note }}"
+          } >> "$log_file"
+
+          # Set the version tag environment variable
+          date=$(date +'%Y-%m-%d_%H-%M-%S')
+          echo "V_TAG=${{ env.device_name }}-${date}" >> $GITHUB_ENV
+
       - name: -Processing Package
         run: |
           mkdir -p "$GITHUB_WORKSPACE"/GithubRelease
