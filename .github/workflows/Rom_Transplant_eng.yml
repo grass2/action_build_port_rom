@@ -64,33 +64,26 @@ jobs:
         run: |
           sudo bash "$GITHUB_WORKSPACE"/make.sh ${URL} ${OS_version} ${GITHUB_WORKSPACE} $GITHUB_ENV ${Bottom_URL} ${IMAGE_TYPE} ${EXT4_RW}
           
-      - name: -Upload gofile
-        run: |
-            User="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-            url2=$(curl -s https://api.gofile.io/servers | jq -r '.data.servers[0].name')
-            [ -z "$url2" ] && url2="store$(( $RANDOM % 8 + 1 ))"
-            LinkFile="$(curl --dns-servers '1.1.1.1' -L -N -H "$User" -F "file=@$GITHUB_WORKSPACE/zip/"${{ env.OS_version }}" "https://${url2}.gofile.io/uploadFile" | jq -r .data.downloadPage)"
-            echo -e "Link: $LinkFile" >> release_notes.txt
-    
-            {
-              echo "- Port ROM: ${{ github.event.inputs.URL }}"
-              echo "- ReHyper ROM: $link_rom"
-              echo "- Vendor Rom: ${{ github.event.inputs.Bottom_URL }}"
-              echo "- MD5: ${{ env.rom_md5 }}"
-             
-              echo "- Build time: $(date +'%Y-%m-%d %H:%M:%S')"
-              echo "- Note: ${{ github.event.inputs.Note }}"
-            } >> "$log_file"
-
-          # Set the version tag environment variable
-            #date=$(date +'%Y-%m-%d_%H-%M-%S')
-            #echo "V_TAG=${{ env.device_name }}-${date}" >> $GITHUB_ENV
-
+      
+      
       - name: -Processing Split Package
         run: |
           mkdir -p "$GITHUB_WORKSPACE"/GithubRelease
           cd "$GITHUB_WORKSPACE"/GithubRelease
           sudo split -b 1536M -d "$GITHUB_WORKSPACE"/zip/"${{ env.NEW_PACKAGE_NAME }}" "${{ env.NEW_PACKAGE_NAME }}"
+          # Create or update the log file with details of the upload
+          log_file="${GITHUB_WORKSPACE}/log.txt"
+          touch "$log_file"
+          chmod 777 "$log_file"
+          {
+              echo "- Port ROM: ${{ github.event.inputs.URL }}"
+              echo "- Vendor ROM: ${{ github.event.inputs.Bottom_URL }}"
+              echo "- BuildType: ${{ github.event.inputs.IMAGE_TYPE }}"
+              echo "- MD5: ${{ env.rom_md5 }}"
+              
+              echo "- Build time: $(date +'%Y-%m-%d %H:%M:%S')"
+              echo "- Note: ${{ github.event.inputs.Note }}"
+          } >> "$log_file"
           
       - name: -Upload to Github Release
         uses: ncipollo/release-action@main
@@ -98,7 +91,7 @@ jobs:
           artifacts: "${{ github.workspace }}/GithubRelease/*"
           name: "${{ env.OS_version }}"
           tag: "${{ env.OS_version }}"
-          bodyFile: "${{ github.workspace }}/file.log"
+          bodyFile: "${{ github.workspace }}/log.txt"
           allowUpdates: true
           artifactErrorsFailBuild: true
           token: ${{ secrets.GITHUB_TOKEN }}
