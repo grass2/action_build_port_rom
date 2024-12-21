@@ -600,10 +600,11 @@ if [[ "${img_type}" == "erofs" ]];then
 fi
 rom_name+=".zip"
 sudo mv "$GITHUB_WORKSPACE"/zip/miui_LMI_${datekk}.zip "$GITHUB_WORKSPACE"/zip/"${rom_name}"
-echo -n "新包名为：${rom_name}"
+
+echo -n "The new package name is：${rom_name}"
 echo "NEW_PACKAGE_NAME=$rom_name" >> $GITHUB_ENV
 echo "MD5=${md5:0:32}" >> $GITHUB_ENV
-echo "安全补丁等级: $patchlevel" >> "$GITHUB_WORKSPACE"/file.log
-echo "基于${predevice}_${buildincremental}移植构建" >> "$GITHUB_WORKSPACE"/file.log
-echo "使用底包${predevice_n}_${buildincremental_n}" >> "$GITHUB_WORKSPACE"/file.log
-echo "包名为$rom_name" >> "$GITHUB_WORKSPACE"/file.log
+echo "Security patch level: $patchlevel" >> "$GITHUB_WORKSPACE"/file.log
+echo "based on${predevice}_${buildincremental}Migration Build" >> "$GITHUB_WORKSPACE"/file.log
+echo "Use base bag${predevice_n}_${buildincremental_n}" >> "$GITHUB_WORKSPACE"/file.log
+echo "The package name is$rom_name" >> "$GITHUB_WORKSPACE"/file.log
