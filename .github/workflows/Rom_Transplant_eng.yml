@@ -90,10 +90,10 @@ jobs:
         uses: ncipollo/release-action@main
         with:
           artifacts: "${{ github.workspace }}/GithubRelease/*"
-          name: "${{ env.OS_version }}\nPort package version: ${{ env.URL }}\n\nVendor package version: ${{ env.Bottom_URL }} "
-          #name: "${{ env.OS_version }}"
-          tag: "${{ env.OS_version }}\nPort package version: ${{ env.URL }}\n\nVendor package version: ${{ env.Bottom_URL }} " 
-          #tag: "${{ env.OS_version }}"
+          #name: "${{ env.OS_version }}\nPort package version: ${{ env.URL }}\n\nVendor package version: ${{ env.Bottom_URL }} "
+          name: "${{ env.OS_version }}"
+          #tag: "${{ env.OS_version }}\nPort package version: ${{ env.URL }}\n\nVendor package version: ${{ env.Bottom_URL }} " 
+          tag: "${{ env.OS_version }}"
           bodyFile: "${{ github.workspace }}/log.txt"
           allowUpdates: true
           artifactErrorsFailBuild: true
